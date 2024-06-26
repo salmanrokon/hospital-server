@@ -27,6 +27,8 @@ async function run() {
     await client.connect();
     const servicesCollections = client.db('hospital').collection('services');
     const blogsCollections = client.db('hospital').collection('blogs');
+    const usersCollections = client.db('hospital').collection('users');
+    const doctorsCollections = client.db('hospital').collection('doctors');
 
     app.get('/services', async (req, res) => {
       const services = await servicesCollections.find().toArray();
@@ -40,6 +42,29 @@ async function run() {
       const blogs = await blogsCollections.find(query).toArray();
       res.send(blogs);
     });
+
+    //users related API
+    app.post('/users',async(req,res)=>{
+      const user = req.body;
+      const query={email :user.email}
+      const existingUser =await usersCollections.findOne(query);
+      if(existingUser){
+        res.status(400).send('User already exists');
+        return;
+      }
+      const result = await usersCollections.insertOne(user);
+      res.json(result);
+    })
+
+    app.get('/users',async(req,res)=>{
+      const users = await usersCollections.find().toArray();
+      res.send(users);
+    })
+
+    app.get('/doctors',async(req,res)=>{
+      const doctors = await doctorsCollections.find().toArray();
+      res.send(doctors);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
