@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.e0co39v.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 console.log(uri);
 
@@ -65,6 +65,27 @@ async function run() {
       const doctors = await doctorsCollections.find().toArray();
       res.send(doctors);
     })
+    app.post('/doctors',async(req,res)=>{
+      const doctor = req.body;
+      const query={doctor_id :doctor.doctor_id}
+      const existingDoctor =await doctorsCollections.findOne(query);
+      if(existingDoctor){
+        res.status(400).send('Doctor already exists');
+        return;
+      }
+      const result = await doctorsCollections.insertOne(doctor);
+      res.json(result);
+    });
+
+    app.put('/doctors/:id',async (req, res) => {
+      const id=req.params.id;
+      const query={_id:new ObjectId(id)}
+      const updateDoc={
+        $set:{
+          
+        }
+      }
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
